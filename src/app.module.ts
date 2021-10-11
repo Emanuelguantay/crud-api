@@ -25,6 +25,7 @@ import { ProductModule } from './product/product.module';
       database: configService.get<string>(DB_DATABASE),
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+      logging: false,
     }),
     
     // connectionFactory receives the configured ConnectionOptions
