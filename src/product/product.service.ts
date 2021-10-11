@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductDto } from './dto/product.dto';
 import { ProductEntity } from './product.entity';
@@ -33,13 +33,21 @@ export class ProductService {
     }
 
     async create(dto: ProductDto): Promise<any>{
+        const exist = await this.findByName(dto.name);
+        if (exist) throw new BadRequestException({message: "Ese nombre ya existe"});
         const product = this.productRepository.create(dto);
         await this.productRepository.save(product);
         return {message: `Producto ${product.name} creado`};
+        return dto;
     }
 
     async update(id:number, dto: ProductDto): Promise<any>{
         const product = await this.findById(id);
+        if (!product) throw new BadRequestException({message: "Ese producto no existe"});
+
+        const exist = await this.findByName(dto.name);
+        if (exist && exist.id !== id) throw new BadRequestException({message: "Ese nombre ya existe"});
+
         dto.name? product.name = dto.name: product.name = await product.name;
         dto.price? product.price = dto.price: product.price = await product.price;
         await this.productRepository.save(product);
